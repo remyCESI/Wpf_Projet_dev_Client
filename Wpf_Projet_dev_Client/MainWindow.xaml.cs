@@ -32,6 +32,7 @@ namespace Wpf_Projet_dev_Client
         private void BtnSubmit_Click(object sender, RoutedEventArgs e)
         {
 
+            //information about the remote server
             string server = "51.210.103.59";
             string port = "3306";
             string database = "ProjetDev_db";
@@ -39,7 +40,7 @@ namespace Wpf_Projet_dev_Client
             string password = "cesiexia";
             string vlogin = txtLogin.Text;
             string vpwd = txtPwd.Text;
-            string vtoken = txtTk.Text;
+            
 
 
 
@@ -48,27 +49,30 @@ namespace Wpf_Projet_dev_Client
             MySqlConnection conMysql = new MySqlConnection(connectionString);
             try
             {
+
                 conMysql.Open();
-            MySqlCommand Sqlcmd = new MySqlCommand("SELECT count(1) FROM infoUser where login=@login AND pwd = sha1(@pwd) and token_app= @token", conMysql);
 
-            Sqlcmd.CommandType = CommandType.Text;
+                //querie to check if the user's informations match
+                MySqlCommand Sqlcmd = new MySqlCommand("SELECT count(1) FROM infoUser where login=@login AND pwd = sha1(@pwd)", conMysql);
+                Sqlcmd.Parameters.AddWithValue("@login", vlogin);
+                Sqlcmd.Parameters.AddWithValue("@pwd", vpwd);
+            
+                int count = Convert.ToInt32(Sqlcmd.ExecuteScalar());
 
-            Sqlcmd.Parameters.AddWithValue("@login", vlogin);
-            Sqlcmd.Parameters.AddWithValue("@pwd", vpwd);
-            Sqlcmd.Parameters.AddWithValue("@token", vtoken);
-            int count = Convert.ToInt32(Sqlcmd.ExecuteScalar());
-
-                if (count == 1)
-                {
-                    Dechiffrement pdechiffrement = new Dechiffrement();
-                    pdechiffrement.Show();
-                    conMysql.Close();
-
-                }
-                else
-                {
-                    NotifError.Visibility = Visibility.Visible;
-                }
+                //if it exist a result do something 
+                    if (count == 1)
+                    {
+                        //instance of the new windows called dechiffrement
+                        Dechiffrement pdechiffrement = new Dechiffrement();
+                        //to make the new windows visible
+                        pdechiffrement.Show();
+                        //close the connection
+                        conMysql.Close();
+                    }
+                    else
+                    {
+                        NotifError.Visibility = Visibility.Visible;
+                    }
 
             }
             catch (Exception ex)
